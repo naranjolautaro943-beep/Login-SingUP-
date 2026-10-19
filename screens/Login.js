@@ -102,7 +102,7 @@ export default function Login({ navigation }) {
       contentContainerStyle={styles.container}
       keyboardShouldPersistTaps="handled"
     >
-      <Image source={require('../assets/logo.png')} style={styles.logo} resizeMode="contain" />
+      <Image source={require('../assets/logo-kiosco-azul.png')} style={styles.logo} resizeMode="contain" />
       <Text style={styles.title}>Iniciar sesión</Text>
 
       <Text style={styles.label}>Correo</Text>
@@ -175,9 +175,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORES.blanco,
   },
   logo: {
-    width: 180,
-    height: 150,
-    marginBottom: 16,
+    width: 230,
+    height: 162, // proporción del imagotipo (809 x 569)
+    marginBottom: 24,
   },
   title: {
     fontSize: 26,

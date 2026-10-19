@@ -39,7 +39,7 @@ export default function Navigation() {
           <Stack.Screen name="Home" component={Home} options={{ title: 'Inicio' }} />
         ) : (
           <>
-            <Stack.Screen name="Login" component={Login} options={{ title: 'Iniciar sesión' }} />
+            <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
             <Stack.Screen name="SignUp" component={SignUp} options={{ title: 'Registro' }} />
           </>
         )}
