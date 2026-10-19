@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../src/config/firebaseConfig';
 import { validarObligatorio, validarCorreo, validarContrasena } from '../src/config/utils/validations';
 import KeyboardForm from '../src/config/components/KeyboardWrapper';
@@ -92,6 +92,39 @@ export default function Login({ navigation }) {
     }
   };
 
+  const handleOlvideContrasena = async () => {
+    // Se usa el correo escrito en el campo: debe estar completo y tener formato válido
+    const errorCorreo = obtenerErrorCorreo(email);
+    if (errorCorreo) {
+      setErrors((prev) => ({ ...prev, email: errorCorreo }));
+      Alert.alert('Recuperar contraseña', 'Ingrese su correo electrónico en el campo "Correo" para enviarle el enlace de recuperación.');
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      Alert.alert(
+        'Revise su correo',
+        'Si el correo ingresado está registrado, recibirá un enlace para restablecer su contraseña. Revise también la carpeta de spam.'
+      );
+    } catch (error) {
+      console.log('Error al recuperar contraseña:', error.code, error.message);
+      let errorMessage = 'No se pudo enviar el correo de recuperación. Intente nuevamente.';
+      switch (error.code) {
+        case 'auth/invalid-email':
+          errorMessage = MENSAJES.correoInvalido;
+          break;
+        case 'auth/network-request-failed':
+          errorMessage = 'Error de conexión, por favor intente más tarde.';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = 'Se realizaron demasiados intentos. Espere unos minutos e intente nuevamente.';
+          break;
+      }
+      Alert.alert('Error', `${errorMessage}\n\nCódigo: ${error.code ?? 'desconocido'}`);
+    }
+  };
+
   const colorBorde = (campo) => {
     if (errors[campo]) return COLORES.error;
     if (focused === campo) return COLORES.celesteCielo;
@@ -102,7 +135,7 @@ export default function Login({ navigation }) {
     <KeyboardForm style={styles.container}>
       <Image source={require('../assets/logo-kiosco-azul.png')} style={styles.logo} resizeMode="contain" />
       <Text style={styles.slogan}>
-        Bienvenido al Sistema Kiosko Azul.
+        Somos el comercio de barrio de siempre, con las puertas siempre abiertas. Te acercamos lo que necesitás, rápido y con la calidez de tu kiosco.
       </Text>
       <Text style={styles.title}>Iniciar sesión</Text>
 
@@ -149,6 +182,10 @@ export default function Login({ navigation }) {
         </TouchableOpacity>
       </View>
       {!!errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+
+      <TouchableOpacity style={styles.forgotContainer} onPress={handleOlvideContrasena}>
+        <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity
         style={[styles.button, camposVacios && styles.buttonDisabled]}
@@ -224,6 +261,15 @@ const styles = StyleSheet.create({
     color: COLORES.error,
     fontSize: 13,
     marginBottom: 10,
+  },
+  forgotContainer: {
+    alignSelf: 'flex-end',
+    marginTop: 4,
+  },
+  forgotText: {
+    color: COLORES.celesteCielo,
+    fontSize: 14,
+    fontWeight: '600',
   },
   button: {
     backgroundColor: COLORES.azulMarino,
