@@ -101,6 +101,9 @@ export default function Login({ navigation }) {
   return (
     <KeyboardForm style={styles.container}>
       <Image source={require('../assets/logo-kiosco-azul.png')} style={styles.logo} resizeMode="contain" />
+      <Text style={styles.slogan}>
+        Bienvenido al Sistema Kiosko Azul.
+      </Text>
       <Text style={styles.title}>Iniciar sesión</Text>
 
       <Text style={styles.label}>Correo</Text>
@@ -176,6 +179,15 @@ const styles = StyleSheet.create({
     width: 230,
     height: 162, // proporción del imagotipo (809 x 569)
     marginBottom: 24,
+  },
+  slogan: {
+    fontSize: 14,
+    fontWeight: '300',
+    lineHeight: 21,
+    textAlign: 'center',
+    color: COLORES.azulMarino,
+    marginBottom: 20,
+    paddingHorizontal: 8,
   },
   title: {
     fontSize: 26,
