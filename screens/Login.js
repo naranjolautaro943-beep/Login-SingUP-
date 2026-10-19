@@ -1,123 +1,202 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../src/config/firebaseConfig';
+import { validarObligatorio, validarCorreo, validarContrasena } from '../src/config/utils/validations';
+
+// Paleta institucional (Manual de Identidad Corporativa, diapositiva 07)
+const COLORES = {
+  azulMarino: '#0a082d',
+  celesteCielo: '#2f60d0',
+  blanco: '#ffffff',
+  textoSecundario: '#6b6a80', // tono neutro derivado del marino para placeholders
+  error: '#c0392b',
+};
+
+// Mensajes formales de validación
+const MENSAJES = {
+  correoObligatorio: 'El correo electrónico es obligatorio.',
+  correoInvalido: 'Ingrese un correo electrónico válido (ejemplo: usuario@correo.com).',
+  contrasenaObligatoria: 'La contraseña es obligatoria.',
+  contrasenaInvalida:
+    'La contraseña debe tener al menos 8 caracteres e incluir mayúscula, minúscula, número y un carácter especial.',
+};
+
+const obtenerErrorCorreo = (valor) => {
+  if (!validarObligatorio(valor)) return MENSAJES.correoObligatorio;
+  if (!validarCorreo(valor)) return MENSAJES.correoInvalido;
+  return '';
+};
+
+const obtenerErrorContrasena = (valor) => {
+  if (!validarObligatorio(valor)) return MENSAJES.contrasenaObligatoria;
+  if (!validarContrasena(valor)) return MENSAJES.contrasenaInvalida;
+  return '';
+};
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({ email: '', password: '' });
+  const [focused, setFocused] = useState(null); // 'email' | 'password' | null
+
+  // El botón queda deshabilitado mientras haya campos vacíos
+  const camposVacios = !validarObligatorio(email) || !validarObligatorio(password);
+
+  const handleEmailChange = (text) => {
+    setEmail(text);
+    if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
+  };
+
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
+  };
+
+  const validarFormulario = () => {
+    const nuevosErrores = {
+      email: obtenerErrorCorreo(email),
+      password: obtenerErrorContrasena(password),
+    };
+    setErrors(nuevosErrores);
+    return !nuevosErrores.email && !nuevosErrores.password;
+  };
 
   const handleLogin = async () => {
-    if (!email.trim() || !password) {
-      Alert.alert("Error", "Por favor ingrese ambos campos.");
-      return;
-    }
+    if (!validarFormulario()) return;
 
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);
-      Alert.alert("Login exitoso", "Has iniciado sesión correctamente.");
       // El observador de Firebase cambia la pantalla al detectar la sesión.
     } catch (error) {
       console.error('Error de inicio de sesión:', error.code, error.message);
-      let errorMessage = "Hubo un problema al iniciar sesión.";
+      let errorMessage = 'Hubo un problema al iniciar sesión.';
       switch (error.code) {
-        case 'auth/invalid-email':
-          errorMessage = "El formato del correo electrónico no es válido.";
-          break;
+        // Mensaje único para credenciales incorrectas
         case 'auth/invalid-credential':
         case 'auth/wrong-password':
-          errorMessage = "La contraseña es incorrecta.";
-          break;
         case 'auth/user-not-found':
-          errorMessage = "No se encontró un usuario con este correo.";
+          errorMessage = 'Correo o contraseña incorrectos.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = MENSAJES.correoInvalido;
           break;
         case 'auth/network-request-failed':
-          errorMessage = "Error de conexión, por favor intenta más tarde.";
-          break;
-        case 'auth/invalid-api-key':
-          errorMessage = "La clave API de Firebase no es válida. Revisa el archivo .env.";
+          errorMessage = 'Error de conexión, por favor intente más tarde.';
           break;
       }
-      Alert.alert("Error", `${errorMessage}\n\nCódigo: ${error.code ?? 'desconocido'}`);
+      Alert.alert('Error', errorMessage);
     }
   };
 
+  const colorBorde = (campo) => {
+    if (errors[campo]) return COLORES.error;
+    if (focused === campo) return COLORES.celesteCielo;
+    return COLORES.azulMarino;
+  };
+
   return (
-    <View style={styles.container}>
-      <Image source={require('../assets/logo.png')} style={styles.logo} />
+    <ScrollView
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+    >
+      <Image source={require('../assets/logo.png')} style={styles.logo} resizeMode="contain" />
       <Text style={styles.title}>Iniciar sesión</Text>
 
       <Text style={styles.label}>Correo</Text>
-      <View style={styles.inputContainer}>
-        <FontAwesome name="envelope" size={20} color="#ccc" style={styles.icon} />
+      <View style={[styles.inputContainer, { borderColor: colorBorde('email') }]}>
+        <FontAwesome name="envelope" size={20} color={COLORES.azulMarino} style={styles.icon} />
         <TextInput
           style={styles.input}
-          placeholder="Ingrese su correo"
+          placeholder="Usuario@correo.com"
+          placeholderTextColor={COLORES.textoSecundario}
           value={email}
-          onChangeText={setEmail}
+          onChangeText={handleEmailChange}
+          onFocus={() => setFocused('email')}
+          onBlur={() => {
+            setFocused(null);
+            setErrors((prev) => ({ ...prev, email: email ? obtenerErrorCorreo(email) : '' }));
+          }}
           keyboardType="email-address"
           autoCapitalize="none"
+          autoCorrect={false}
         />
       </View>
+      {!!errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
       <Text style={styles.label}>Contraseña</Text>
-      <View style={styles.inputContainer}>
-        <FontAwesome name="lock" size={20} color="#ccc" style={styles.icon} />
+      <View style={[styles.inputContainer, { borderColor: colorBorde('password') }]}>
+        <FontAwesome name="lock" size={20} color={COLORES.azulMarino} style={styles.icon} />
         <TextInput
           style={styles.input}
           placeholder="Ingrese su contraseña"
+          placeholderTextColor={COLORES.textoSecundario}
           value={password}
-          onChangeText={setPassword}
+          onChangeText={handlePasswordChange}
+          onFocus={() => setFocused('password')}
+          onBlur={() => {
+            setFocused(null);
+            setErrors((prev) => ({ ...prev, password: password ? obtenerErrorContrasena(password) : '' }));
+          }}
           secureTextEntry={!showPassword}
+          autoCapitalize="none"
         />
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-          <FontAwesome name={showPassword ? "eye-slash" : "eye"} size={20} color="#ccc" />
+          <FontAwesome name={showPassword ? 'eye-slash' : 'eye'} size={20} color={COLORES.celesteCielo} />
         </TouchableOpacity>
       </View>
+      {!!errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+      <TouchableOpacity
+        style={[styles.button, camposVacios && styles.buttonDisabled]}
+        onPress={handleLogin}
+        disabled={camposVacios}
+      >
         <Text style={styles.buttonText}>Ingresar</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-        <Text style={styles.signUpText}>¿No tienes cuenta aún? Regístrate</Text>
+        <Text style={styles.signUpText}>
+          ¿No tienes cuenta aún? <Text style={styles.signUpLink}>Regístrate</Text>
+        </Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
+    padding: 24,
+    backgroundColor: COLORES.blanco,
   },
   logo: {
-    width: 100,
-    height: 100,
-    marginBottom: 20,
+    width: 180,
+    height: 150,
+    marginBottom: 16,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '700', // SemiBold/Bold para títulos
+    color: COLORES.azulMarino,
     marginBottom: 20,
   },
   label: {
     alignSelf: 'flex-start',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    color: COLORES.azulMarino,
     marginTop: 10,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderColor: '#b9770e',
-    marginBottom: 20,
+    borderBottomWidth: 1.5,
+    marginBottom: 5,
     width: '100%',
   },
   icon: {
@@ -125,22 +204,39 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 40,
+    height: 44,
+    fontSize: 15,
+    fontWeight: '300', // Light/Regular para texto general
+    color: COLORES.azulMarino,
+  },
+  errorText: {
+    alignSelf: 'flex-start',
+    color: COLORES.error,
+    fontSize: 13,
+    marginBottom: 10,
   },
   button: {
-    backgroundColor: '#922b21',
-    paddingVertical: 10,
-    paddingHorizontal: 40,
-    borderRadius: 5,
-    marginTop: 20,
+    backgroundColor: COLORES.azulMarino,
+    paddingVertical: 12,
+    paddingHorizontal: 48,
+    borderRadius: 8,
+    marginTop: 24,
+  },
+  buttonDisabled: {
+    opacity: 0.4,
   },
   buttonText: {
-    color: '#fff',
+    color: COLORES.blanco,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   signUpText: {
-    marginTop: 20,
-    color: '#007AFF',
+    marginTop: 24,
+    color: COLORES.azulMarino,
+    fontWeight: '300',
+  },
+  signUpLink: {
+    color: COLORES.celesteCielo,
+    fontWeight: '700',
   },
 });
