@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { auth } from '../src/config/firebaseConfig';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
@@ -9,6 +9,7 @@ import {
   validarContrasena,
   coincidenContrasenas,
 } from '../src/config/utils/validations';
+import KeyboardForm from '../src/config/components/KeyboardWrapper';
 
 // Paleta institucional (Manual de Identidad Corporativa, diapositiva 07)
 const COLORES = {
@@ -183,7 +184,7 @@ export default function SignUp({ navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <KeyboardForm style={styles.container}>
       <Image source={require('../assets/logo-kiosco-azul.png')} style={styles.logo} resizeMode="contain" />
       <Text style={styles.title}>Regístrate</Text>
 
@@ -266,7 +267,7 @@ export default function SignUp({ navigation }) {
           ¿Ya tienes cuenta? <Text style={styles.signUpLink}>Inicia sesión</Text>
         </Text>
       </TouchableOpacity>
-    </ScrollView>
+    </KeyboardForm>
   );
 }
 

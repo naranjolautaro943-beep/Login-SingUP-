@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../src/config/firebaseConfig';
 import { validarObligatorio, validarCorreo, validarContrasena } from '../src/config/utils/validations';
+import KeyboardForm from '../src/config/components/KeyboardWrapper';
 
 // Paleta institucional (Manual de Identidad Corporativa, diapositiva 07)
 const COLORES = {
@@ -71,7 +72,7 @@ export default function Login({ navigation }) {
       await signInWithEmailAndPassword(auth, email.trim(), password);
       // El observador de Firebase cambia la pantalla al detectar la sesión.
     } catch (error) {
-      console.error('Error de inicio de sesión:', error.code, error.message);
+      console.log('Error de inicio de sesión:', error.code, error.message);
       let errorMessage = 'Hubo un problema al iniciar sesión.';
       switch (error.code) {
         // Mensaje único para credenciales incorrectas
@@ -98,10 +99,7 @@ export default function Login({ navigation }) {
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps="handled"
-    >
+    <KeyboardForm style={styles.container}>
       <Image source={require('../assets/logo-kiosco-azul.png')} style={styles.logo} resizeMode="contain" />
       <Text style={styles.title}>Iniciar sesión</Text>
 
@@ -162,7 +160,7 @@ export default function Login({ navigation }) {
           ¿No tienes cuenta aún? <Text style={styles.signUpLink}>Regístrate</Text>
         </Text>
       </TouchableOpacity>
-    </ScrollView>
+    </KeyboardForm>
   );
 }
 
