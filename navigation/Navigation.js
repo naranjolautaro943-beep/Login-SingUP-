@@ -40,7 +40,15 @@ export default function Navigation() {
         ) : (
           <>
             <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
-            <Stack.Screen name="SignUp" component={SignUp} options={{ title: 'Registro' }} />
+            <Stack.Screen
+              name="SignUp"
+              component={SignUp}
+              options={{
+                title: 'Registro',
+                headerTintColor: '#0a082d',
+                headerTitleStyle: { fontWeight: '700', color: '#0a082d' },
+              }}
+            />
           </>
         )}
       </Stack.Navigator>
