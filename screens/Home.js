@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../src/config/firebaseConfig';
-
+import { colors, spacing } from '../src/config/stilos/theme';
 export default function Home({ navigation }) {
 
   const handleLogOut = async () => {
@@ -17,7 +17,7 @@ export default function Home({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/logo.png')} style={styles.logo} />
+      <Image source={require('../assets/logo1.png')} style={styles.logo} />
       <Text style={styles.title}>Bienvenido a la aplicación</Text>
       <TouchableOpacity style={styles.button} onPress={handleLogOut}>
         <Text style={styles.buttonText}>Cerrar sesión</Text>
@@ -31,28 +31,29 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
+    padding: spacing.large,
+    backgroundColor: colors.primary,
   },
   logo: {
-    width: 100,
+    width: 200,
     height: 100,
-    marginBottom: 20,
+    marginBottom: spacing.medium,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    color: colors.text,
+    marginBottom:  spacing.medium,
   },
   button: {
-    backgroundColor: '#922b21',
+    backgroundColor:  colors.background,
     paddingVertical: 10,
     paddingHorizontal: 40,
     borderRadius: 5,
-    marginTop: 20,
+    marginTop: spacing.medium,
   },
   buttonText: {
-    color: '#fff',
+    color: colors.primary,
     fontSize: 16,
     fontWeight: 'bold',
   },
