@@ -18,10 +18,8 @@ const COLORES = {
 // Mensajes formales de validación
 const MENSAJES = {
   correoObligatorio: 'El correo electrónico es obligatorio.',
-  correoInvalido: 'Ingrese un correo electrónico válido (ejemplo: usuario@correo.com).',
+  correoInvalido: 'Ingrese un correo electrónico para Iniciar sesión',
   contrasenaObligatoria: 'La contraseña es obligatoria.',
-  contrasenaInvalida:
-    'La contraseña debe tener al menos 8 caracteres e incluir mayúscula, minúscula, número y un carácter especial.',
 };
 
 const obtenerErrorCorreo = (valor) => {
@@ -135,7 +133,7 @@ export default function Login({ navigation }) {
     <KeyboardForm style={styles.container}>
       <Image source={require('../assets/logo-kiosco-azul.png')} style={styles.logo} resizeMode="contain" />
       <Text style={styles.slogan}>
-        Somos el comercio de barrio de siempre, con las puertas siempre abiertas. Te acercamos lo que necesitás, rápido y con la calidez de tu kiosco.
+        Bienvenido al Sistema Kiosco Azul.
       </Text>
       <Text style={styles.title}>Iniciar sesión</Text>
 

@@ -39,3 +39,8 @@ export const coincidenContrasenas = (contrasena,confirmacion) => {
     contrasena === confirmacion
   );
 };
+
+export const validarSoloLetras = (valor) => {
+  // Permite letras (con tildes, ñ y ü) y espacios; también acepta el texto vacío
+  return typeof valor === 'string' && /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]*$/.test(valor);
+};

@@ -8,6 +8,7 @@ import {
   validarCorreo,
   validarContrasena,
   coincidenContrasenas,
+  validarSoloLetras,
 } from '../src/config/utils/validations';
 import KeyboardForm from '../src/config/components/KeyboardWrapper';
 
@@ -22,6 +23,7 @@ const COLORES = {
 
 // Mensajes formales de validación
 const MENSAJES = {
+  soloLetras: 'Únicamente caracteres alfabéticos',
   nombreObligatorio: 'El nombre es obligatorio.',
   apellidoObligatorio: 'El apellido es obligatorio.',
   correoObligatorio: 'El correo electrónico es obligatorio.',
@@ -33,8 +35,17 @@ const MENSAJES = {
   noCoinciden: 'Las contraseñas no coinciden.',
 };
 
-const obtenerErrorNombre = (v) => (validarObligatorio(v) ? '' : MENSAJES.nombreObligatorio);
-const obtenerErrorApellido = (v) => (validarObligatorio(v) ? '' : MENSAJES.apellidoObligatorio);
+const obtenerErrorNombre = (v) => {
+  if (!validarObligatorio(v)) return MENSAJES.nombreObligatorio;
+  if (!validarSoloLetras(v)) return MENSAJES.soloLetras;
+  return '';
+};
+
+const obtenerErrorApellido = (v) => {
+  if (!validarObligatorio(v)) return MENSAJES.apellidoObligatorio;
+  if (!validarSoloLetras(v)) return MENSAJES.soloLetras;
+  return '';
+};
 
 const obtenerErrorCorreo = (v) => {
   if (!validarObligatorio(v)) return MENSAJES.correoObligatorio;
@@ -135,6 +146,16 @@ export default function SignUp({ navigation }) {
 
   const setError = (campo, mensaje) => setErrors((prev) => ({ ...prev, [campo]: mensaje }));
 
+  // Nombre y apellido: solo se aceptan letras; si se escribe otro carácter se bloquea y se muestra el error
+  const cambiarSoloLetras = (campo, setter) => (texto) => {
+    if (!validarSoloLetras(texto)) {
+      setError(campo, MENSAJES.soloLetras);
+      return;
+    }
+    setter(texto);
+    limpiarError(campo);
+  };
+
   const validarFormulario = () => {
     const nuevosErrores = {
       firstName: obtenerErrorNombre(firstName),
@@ -193,7 +214,7 @@ export default function SignUp({ navigation }) {
         icono="user"
         placeholder="Ingrese su nombre"
         value={firstName}
-        onChangeText={(t) => { setFirstName(t); limpiarError('firstName'); }}
+        onChangeText={cambiarSoloLetras('firstName', setFirstName)}
         onBlur={() => setError('firstName', firstName ? obtenerErrorNombre(firstName) : '')}
         error={errors.firstName}
         autoCapitalize="words"
@@ -204,7 +225,7 @@ export default function SignUp({ navigation }) {
         icono="user"
         placeholder="Ingrese su apellido"
         value={lastName}
-        onChangeText={(t) => { setLastName(t); limpiarError('lastName'); }}
+        onChangeText={cambiarSoloLetras('lastName', setLastName)}
         onBlur={() => setError('lastName', lastName ? obtenerErrorApellido(lastName) : '')}
         error={errors.lastName}
         autoCapitalize="words"
