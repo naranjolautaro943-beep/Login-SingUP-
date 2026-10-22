@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../src/config/firebaseConfig';
 import { validarObligatorio, validarCorreo, validarContrasena } from '../src/config/utils/validations';
 import KeyboardForm from '../src/config/components/KeyboardWrapper';
+import ModalRecuperarContrasena from '../src/config/components/ModalRecuperarContrasena';
 
 // Paleta institucional (Manual de Identidad Corporativa, diapositiva 07)
 const COLORES = {
@@ -40,6 +41,8 @@ export default function Login({ navigation }) {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({ email: '', password: '' });
   const [focused, setFocused] = useState(null); // 'email' | 'password' | null
+
+  const [modalVisible, setModalVisible] = useState(false); // modal "Olvidé mi contraseña"
 
   // El botón queda deshabilitado mientras haya campos vacíos
   const camposVacios = !validarObligatorio(email) || !validarObligatorio(password);
@@ -90,38 +93,7 @@ export default function Login({ navigation }) {
     }
   };
 
-  const handleOlvideContrasena = async () => {
-    // Se usa el correo escrito en el campo: debe estar completo y tener formato válido
-    const errorCorreo = obtenerErrorCorreo(email);
-    if (errorCorreo) {
-      setErrors((prev) => ({ ...prev, email: errorCorreo }));
-      Alert.alert('Recuperar contraseña', 'Ingrese su correo electrónico en el campo "Correo" para enviarle el enlace de recuperación.');
-      return;
-    }
-
-    try {
-      await sendPasswordResetEmail(auth, email.trim());
-      Alert.alert(
-        'Revise su correo',
-        'Si el correo ingresado está registrado, recibirá un enlace para restablecer su contraseña. Revise también la carpeta de spam.'
-      );
-    } catch (error) {
-      console.log('Error al recuperar contraseña:', error.code, error.message);
-      let errorMessage = 'No se pudo enviar el correo de recuperación. Intente nuevamente.';
-      switch (error.code) {
-        case 'auth/invalid-email':
-          errorMessage = MENSAJES.correoInvalido;
-          break;
-        case 'auth/network-request-failed':
-          errorMessage = 'Error de conexión, por favor intente más tarde.';
-          break;
-        case 'auth/too-many-requests':
-          errorMessage = 'Se realizaron demasiados intentos. Espere unos minutos e intente nuevamente.';
-          break;
-      }
-      Alert.alert('Error', `${errorMessage}\n\nCódigo: ${error.code ?? 'desconocido'}`);
-    }
-  };
+  const abrirModal = () => setModalVisible(true);
 
   const colorBorde = (campo) => {
     if (errors[campo]) return COLORES.error;
@@ -133,7 +105,7 @@ export default function Login({ navigation }) {
     <KeyboardForm style={styles.container}>
       <Image source={require('../assets/logo-kiosco-azul.png')} style={styles.logo} resizeMode="contain" />
       <Text style={styles.slogan}>
-        Bienvenido al Sistema Kiosco Azul.
+        Bienvenidos al Sistema de Kiosko Azul.
       </Text>
       <Text style={styles.title}>Iniciar sesión</Text>
 
@@ -181,7 +153,7 @@ export default function Login({ navigation }) {
       </View>
       {!!errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
 
-      <TouchableOpacity style={styles.forgotContainer} onPress={handleOlvideContrasena}>
+      <TouchableOpacity style={styles.forgotContainer} onPress={abrirModal}>
         <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
       </TouchableOpacity>
 
@@ -198,6 +170,13 @@ export default function Login({ navigation }) {
           ¿No tienes cuenta aún? <Text style={styles.signUpLink}>Regístrate</Text>
         </Text>
       </TouchableOpacity>
+
+      <ModalRecuperarContrasena
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        emailInicial={email.trim()}
+        onEnviado={(correo) => setEmail(correo)}
+      />
     </KeyboardForm>
   );
 }
