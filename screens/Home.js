@@ -18,7 +18,10 @@ export default function Home({ navigation }) {
   const nombre = auth.currentUser?.displayName || 'usuario';
 
   const handleOpcion = (opcion) => {
-    // Cuando existan las pantallas: navigation.navigate('NombreDeLaPantalla')
+    if (opcion.id === 'productos') {
+      navigation.navigate('ListadoProductos');
+      return;
+    }
     Alert.alert(opcion.titulo, 'Esta sección estará disponible próximamente.');
   };
 
@@ -37,7 +40,6 @@ export default function Home({ navigation }) {
       <View style={styles.header}>
         <View style={styles.brand}>
           <Image source={require('../assets/Imagen2.png')} style={styles.logo} />
-          
         </View>
         <TouchableOpacity onPress={() => Alert.alert('Notificaciones', 'No tenés notificaciones nuevas.')}>
           <Ionicons name="notifications-outline" size={26} color={colors.primary} />
@@ -80,9 +82,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.large,
   },
   brand: { flexDirection: 'row', alignItems: 'center' },
-  logo: { width: 200, height: 60, resizeMode: 'contain', },
-  brandText: { fontSize: fontSizes.medium + 2, color: colors.primary },
-  brandAccent: { color: '#2f6be0' },
+  logo: { width: 200, height: 60, resizeMode: 'contain' },
   saludo: { fontSize: 30, color: colors.primary, marginBottom: spacing.small },
   pregunta: { fontSize: fontSizes.medium, color: colors.primary },
   grid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: spacing.large * 1.5 },

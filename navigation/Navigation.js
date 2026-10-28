@@ -7,6 +7,8 @@ import { auth, isFirebaseConfigured } from '../src/config/firebaseConfig';
 import Login from '../screens/Login';
 import SignUp from '../screens/SignUp';
 import Home from '../screens/Home';
+import ListadoProductos from '../screens/ListadoProductos';
+import FormularioProducto from '../screens/FormularioProducto';
 
 const Stack = createStackNavigator();
 
@@ -36,7 +38,19 @@ export default function Navigation() {
     <NavigationContainer>
       <Stack.Navigator>
         {user ? (
-          <Stack.Screen name="Home" component={Home} options={{ title: 'Inicio' }} />
+          <>
+            <Stack.Screen name="Home" component={Home} options={{ title: 'Inicio' }} />
+            <Stack.Screen
+              name="ListadoProductos"
+              component={ListadoProductos}
+              options={{ title: 'Productos' }}
+            />
+            <Stack.Screen
+              name="FormularioProducto"
+              component={FormularioProducto}
+              options={{ title: 'Nuevo producto' }}
+            />
+          </>
         ) : (
           <>
             <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
