@@ -17,6 +17,7 @@ const OPCIONES = [
 const RUTAS = {
   caja: 'ListadoCaja',
   productos: 'ListadoProductos',
+  catalogo: 'ListadoCatalogo',
 };
 
 export default function Home({ navigation }) {
