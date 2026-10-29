@@ -7,9 +7,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import { obtenerProductos } from '../src/config/services/productosService';
+import {
+  obtenerProductos,
+  eliminarProducto,
+} from '../src/config/services/productosService';
 import { colors, fontSizes, spacing } from '../src/config/stilos/theme';
 
 export default function ListadoProductos({ navigation }) {
@@ -17,21 +22,44 @@ export default function ListadoProductos({ navigation }) {
   const [busqueda, setBusqueda] = useState('');
   const [cargando, setCargando] = useState(true);
 
+  const cargar = async () => {
+    try {
+      const datos = await obtenerProductos();
+      setProductos(datos);
+    } catch (e) {
+      console.log('Error al cargar productos', e);
+    } finally {
+      setCargando(false);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
-      const cargar = async () => {
-        try {
-          const datos = await obtenerProductos();
-          setProductos(datos);
-        } catch (e) {
-          console.log('Error al cargar productos', e);
-        } finally {
-          setCargando(false);
-        }
-      };
       cargar();
     }, [])
   );
+
+  const confirmarEliminar = (producto) => {
+    Alert.alert(
+      'Eliminar producto',
+      'Se va a borrar "' + producto.nombre + '". Esta accion no se puede deshacer.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await eliminarProducto(producto.id);
+              await cargar();
+            } catch (e) {
+              Alert.alert('Error', 'No se pudo eliminar el producto.');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const filtrados = productos.filter((p) =>
     (p.nombre || '').toLowerCase().includes(busqueda.toLowerCase())
@@ -65,10 +93,15 @@ export default function ListadoProductos({ navigation }) {
         contentContainerStyle={{ paddingBottom: 90 }}
         renderItem={({ item }) => (
           <View style={styles.tarjeta}>
-            <Text style={styles.nombre}>{item.nombre}</Text>
-            <Text style={styles.detalle}>
-              {'$' + item.precio + ' - Stock ' + item.stock}
-            </Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.nombre}>{item.nombre}</Text>
+              <Text style={styles.detalle}>
+                {'$' + item.precio + ' - Stock ' + item.stock}
+              </Text>
+            </View>
+            <TouchableOpacity onPress={() => confirmarEliminar(item)}>
+              <Ionicons name="trash-outline" size={24} color={colors.error} />
+            </TouchableOpacity>
           </View>
         )}
       />
@@ -99,6 +132,8 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.medium,
   },
   tarjeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 12,
