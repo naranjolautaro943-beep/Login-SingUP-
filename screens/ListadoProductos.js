@@ -12,7 +12,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { obtenerProductos, eliminarProducto } from '../src/config/services/productosService';
 import { colors, fontSizes, spacing } from '../src/config/stilos/theme';
-import ModalConfirmarEliminar from '../src/config/components/Modalconfirmareliminar.js';
+import ModalConfirmarEliminar from '../src/config/components/ModalConfirmarEliminar.js';
 
 export default function ListadoProductos({ navigation }) {
   const [productos, setProductos] = useState([]);

@@ -9,6 +9,8 @@ import SignUp from '../screens/SignUp';
 import Home from '../screens/Home';
 import ListadoProductos from '../screens/ListadoProductos';
 import FormularioProducto from '../screens/FormularioProducto';
+import ListadoCaja from '../screens/ListadoCaja';
+import FormularioMovimiento from '../screens/FormularioMovimiento';
 
 const Stack = createStackNavigator();
 
@@ -49,6 +51,18 @@ export default function Navigation() {
               name="FormularioProducto"
               component={FormularioProducto}
               options={{ title: 'Nuevo producto' }}
+            />
+            <Stack.Screen
+              name="ListadoCaja"
+              component={ListadoCaja}
+              options={{ title: 'Caja' }}
+            />
+            <Stack.Screen
+              name="FormularioMovimiento"
+              component={FormularioMovimiento}
+              options={({ route }) => ({
+                title: route.params?.movimiento ? 'Editar movimiento' : 'Nuevo movimiento',
+              })}
             />
           </>
         ) : (

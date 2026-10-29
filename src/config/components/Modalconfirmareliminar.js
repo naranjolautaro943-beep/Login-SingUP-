@@ -15,13 +15,22 @@ const COLORES = {
  *
  * Props:
  *  - visible:     muestra u oculta el modal
+ *  - titulo:      título del modal (por defecto "Eliminar producto")
  *  - nombre:      nombre del registro a eliminar (se muestra en el mensaje)
  *  - eliminando:  true mientras se ejecuta la eliminación
  *  - error:       mensaje de error (opcional)
  *  - onConfirmar: se llama al presionar "Eliminar"
  *  - onCancelar:  se llama al presionar "Cancelar" o la X
  */
-export default function ModalConfirmarEliminar({ visible, nombre, eliminando, error, onConfirmar, onCancelar }) {
+export default function ModalConfirmarEliminar({
+  visible,
+  titulo = 'Eliminar producto',
+  nombre,
+  eliminando,
+  error,
+  onConfirmar,
+  onCancelar,
+}) {
   const cancelar = () => {
     if (eliminando) return;
     onCancelar && onCancelar();
@@ -32,7 +41,7 @@ export default function ModalConfirmarEliminar({ visible, nombre, eliminando, er
       <View style={styles.overlay}>
         <View style={styles.card}>
           <FontAwesome name="trash" size={40} color={COLORES.error} style={styles.icono} />
-          <Text style={styles.titulo}>Eliminar producto</Text>
+          <Text style={styles.titulo}>{titulo}</Text>
           <Text style={styles.texto}>
             ¿Está seguro de que desea eliminar <Text style={styles.nombre}>{nombre}</Text>? Esta acción no se puede
             deshacer.

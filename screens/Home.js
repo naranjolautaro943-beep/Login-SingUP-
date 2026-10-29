@@ -13,13 +13,20 @@ const OPCIONES = [
   { id: 'actividad', titulo: 'Actividad', icono: 'pulse' },
 ];
 
+// Pantalla a la que lleva cada opción; las que no figuran todavía muestran el aviso "próximamente"
+const RUTAS = {
+  caja: 'ListadoCaja',
+  productos: 'ListadoProductos',
+};
+
 export default function Home({ navigation }) {
   const insets = useSafeAreaInsets();
   const nombre = auth.currentUser?.displayName || 'usuario';
 
   const handleOpcion = (opcion) => {
-    if (opcion.id === 'productos') {
-      navigation.navigate('ListadoProductos');
+    const ruta = RUTAS[opcion.id];
+    if (ruta) {
+      navigation.navigate(ruta);
       return;
     }
     Alert.alert(opcion.titulo, 'Esta sección estará disponible próximamente.');
