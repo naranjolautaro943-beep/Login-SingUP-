@@ -10,31 +10,37 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import {
-  obtenerProductos,
+  obtenerProductos, eliminarProducto,
   eliminarProducto,
 } from '../src/config/services/productosService';
 import { colors, fontSizes, spacing } from '../src/config/stilos/theme';
+import ModalConfirmarEliminar from '../src/config/components/ModalConfirmarEliminar.js';
 
 export default function ListadoProductos({ navigation }) {
   const [productos, setProductos] = useState([]);
   const [busqueda, setBusqueda] = useState('');
   const [cargando, setCargando] = useState(true);
 
-  const cargar = async () => {
-    try {
-      const datos = await obtenerProductos();
-      setProductos(datos);
-    } catch (e) {
-      console.log('Error al cargar productos', e);
-    } finally {
-      setCargando(false);
-    }
-  };
+  // Estado de la eliminación
+  const [seleccionado, setSeleccionado] = useState(null); // producto pendiente de eliminar
+  const [eliminando, setEliminando] = useState(false);
+  const [errorEliminar, setErrorEliminar] = useState('');
 
   useFocusEffect(
     useCallback(() => {
+      const cargar = async () => {
+        try {
+          const datos = await obtenerProductos();
+          setProductos(datos);
+        } catch (e) {
+          console.log('Error al cargar productos', e);
+        } finally {
+          setCargando(false);
+        }
+      };
       cargar();
     }, [])
   );
@@ -59,6 +65,38 @@ export default function ListadoProductos({ navigation }) {
         },
       ]
     );
+  };
+
+  const pedirConfirmacion = (producto) => {
+    setErrorEliminar('');
+    setSeleccionado(producto);
+  };
+
+  const cancelarEliminacion = () => {
+    if (eliminando) return;
+    setSeleccionado(null);
+    setErrorEliminar('');
+  };
+
+  const confirmarEliminacion = async () => {
+    if (!seleccionado) return;
+    setEliminando(true);
+    setErrorEliminar('');
+    try {
+      await eliminarProducto(seleccionado.id);
+      // Se quita de la lista local sin volver a consultar Firestore
+      setProductos((prev) => prev.filter((p) => p.id !== seleccionado.id));
+      setSeleccionado(null);
+    } catch (e) {
+      console.log('Error al eliminar producto', e.code, e.message);
+      setErrorEliminar(
+        e.code === 'permission-denied'
+          ? 'No tiene permisos para eliminar este producto.'
+          : 'No se pudo eliminar el producto. Intente nuevamente.'
+      );
+    } finally {
+      setEliminando(false);
+    }
   };
 
   const filtrados = productos.filter((p) =>
@@ -93,15 +131,10 @@ export default function ListadoProductos({ navigation }) {
         contentContainerStyle={{ paddingBottom: 90 }}
         renderItem={({ item }) => (
           <View style={styles.tarjeta}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.nombre}>{item.nombre}</Text>
-              <Text style={styles.detalle}>
-                {'$' + item.precio + ' - Stock ' + item.stock}
-              </Text>
-            </View>
-            <TouchableOpacity onPress={() => confirmarEliminar(item)}>
-              <Ionicons name="trash-outline" size={24} color={colors.error} />
-            </TouchableOpacity>
+            <Text style={styles.nombre}>{item.nombre}</Text>
+            <Text style={styles.detalle}>
+              {'$' + item.precio + ' - Stock ' + item.stock}
+            </Text>
           </View>
         )}
       />
@@ -112,6 +145,15 @@ export default function ListadoProductos({ navigation }) {
       >
         <Text style={styles.fabText}>+ Agregar</Text>
       </TouchableOpacity>
+
+      <ModalConfirmarEliminar
+        visible={!!seleccionado}
+        nombre={seleccionado?.nombre ?? 'este producto'}
+        eliminando={eliminando}
+        error={errorEliminar}
+        onConfirmar={confirmarEliminacion}
+        onCancelar={cancelarEliminacion}
+      />
     </View>
   );
 }
@@ -132,13 +174,18 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.medium,
   },
   tarjeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 12,
     padding: spacing.medium,
     marginBottom: spacing.small,
+  },
+  tarjetaInfo: {
+    flex: 1,
+  },
+  botonEliminar: {
+    padding: spacing.small,
+    marginLeft: spacing.small,
   },
   nombre: {
     fontSize: fontSizes.medium,
