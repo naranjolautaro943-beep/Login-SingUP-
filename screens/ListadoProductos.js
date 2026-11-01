@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import {
-  obtenerProductos, eliminarProducto,
+  obtenerProductos, 
   eliminarProducto,
 } from '../src/config/services/productosService';
 import { colors, fontSizes, spacing } from '../src/config/stilos/theme';
