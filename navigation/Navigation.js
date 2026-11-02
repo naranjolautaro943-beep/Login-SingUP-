@@ -9,6 +9,7 @@ import SignUp from '../screens/SignUp';
 import Home from '../screens/Home';
 import ListadoProductos from '../screens/ListadoProductos';
 import FormularioProducto from '../screens/FormularioProducto';
+import FormularioEditarProducto from '../screens/FormularioEditarProducto';
 import ListadoCaja from '../screens/ListadoCaja';
 import FormularioMovimiento from '../screens/FormularioMovimiento';
 import ListadoCatalogo from '../screens/ListadoCatalogo';
@@ -55,6 +56,11 @@ export default function Navigation() {
               name="FormularioProducto"
               component={FormularioProducto}
               options={{ title: 'Nuevo producto' }}
+            />
+            <Stack.Screen
+              name="EditarProducto"
+              component={FormularioEditarProducto}
+              options={{ title: 'Editar producto' }}
             />
             <Stack.Screen
               name="ListadoCaja"

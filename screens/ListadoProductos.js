@@ -7,10 +7,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { FontAwesome } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import {
   obtenerProductos, 
@@ -44,28 +42,6 @@ export default function ListadoProductos({ navigation }) {
       cargar();
     }, [])
   );
-
-  const confirmarEliminar = (producto) => {
-    Alert.alert(
-      'Eliminar producto',
-      'Se va a borrar "' + producto.nombre + '". Esta accion no se puede deshacer.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await eliminarProducto(producto.id);
-              await cargar();
-            } catch (e) {
-              Alert.alert('Error', 'No se pudo eliminar el producto.');
-            }
-          },
-        },
-      ]
-    );
-  };
 
   const pedirConfirmacion = (producto) => {
     setErrorEliminar('');
@@ -131,10 +107,26 @@ export default function ListadoProductos({ navigation }) {
         contentContainerStyle={{ paddingBottom: 90 }}
         renderItem={({ item }) => (
           <View style={styles.tarjeta}>
-            <Text style={styles.nombre}>{item.nombre}</Text>
-            <Text style={styles.detalle}>
-              {'$' + item.precio + ' - Stock ' + item.stock}
-            </Text>
+            <View style={styles.tarjetaInfo}>
+              <Text style={styles.nombre}>{item.nombre}</Text>
+              <Text style={styles.detalle}>
+                {'$' + item.precio + ' - Stock ' + item.stock}
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.boton}
+              onPress={() => navigation.navigate('EditarProducto', { id: item.id })}
+            >
+              <Ionicons name="create-outline" size={22} color={colors.primary} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.boton}
+              onPress={() => pedirConfirmacion(item)}
+            >
+              <Ionicons name="trash-outline" size={22} color={colors.error} />
+            </TouchableOpacity>
           </View>
         )}
       />
@@ -174,6 +166,8 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.medium,
   },
   tarjeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 12,
@@ -183,7 +177,7 @@ const styles = StyleSheet.create({
   tarjetaInfo: {
     flex: 1,
   },
-  botonEliminar: {
+  boton: {
     padding: spacing.small,
     marginLeft: spacing.small,
   },
