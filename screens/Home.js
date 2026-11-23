@@ -80,9 +80,7 @@ export default function Home({ navigation }) {
 
       <View style={{ flex: 1 }} />
 
-      <TouchableOpacity style={styles.button} onPress={handleLogOut}>
-        <Text style={styles.buttonText}>Cerrar sesión</Text>
-      </TouchableOpacity>
+      
     </View>
   );
 }
