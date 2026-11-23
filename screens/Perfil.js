@@ -13,6 +13,7 @@ import {
   validarTelefono,
 } from '../src/config/utils/validations';
 import { colors, fontSizes, spacing } from '../src/config/stilos/theme';
+import ModalAyudaSoporte from '../src/config/components/ModalAyudaSoporte';
 
 const CELESTE = '#2f60d0'; // Celeste Cielo (Manual de Identidad)
 
@@ -51,6 +52,7 @@ export default function Perfil({ navigation }) {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [aviso, setAviso] = useState('');
+  const [ayudaVisible, setAyudaVisible] = useState(false);
 
   // LEER el teléfono guardado en Firestore
   useEffect(() => {
@@ -146,6 +148,13 @@ export default function Perfil({ navigation }) {
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {/* Cabecera con avatar */}
         <View style={styles.cabecera}>
+          <TouchableOpacity
+            style={styles.botonTuerca}
+            onPress={() => navigation.navigate('Configuracion')}
+            accessibilityLabel="Configuración"
+          >
+            <Ionicons name="settings-outline" size={26} color={colors.primary} />
+          </TouchableOpacity>
           <View style={styles.avatar}>
             <Text style={styles.avatarTexto}>{iniciales(nombre || nombreOriginal)}</Text>
           </View>
@@ -211,11 +220,11 @@ export default function Perfil({ navigation }) {
         </TouchableOpacity>
 
         {/* Opciones */}
-        <Text style={styles.seccion}>Cuenta</Text>
+        <Text style={styles.seccion}>Ayuda</Text>
 
-        <TouchableOpacity style={styles.fila} onPress={() => navigation.navigate('Configuracion')}>
-          <Ionicons name="settings-outline" size={22} color={colors.primary} style={styles.icono} />
-          <Text style={styles.filaTexto}>Configuración</Text>
+        <TouchableOpacity style={styles.fila} onPress={() => setAyudaVisible(true)}>
+          <Ionicons name="help-circle-outline" size={22} color={colors.primary} style={styles.icono} />
+          <Text style={styles.filaTexto}>Ayuda y Soporte</Text>
           <Ionicons name="chevron-forward" size={20} color={colors.primary} />
         </TouchableOpacity>
 
@@ -223,6 +232,8 @@ export default function Perfil({ navigation }) {
           <Text style={styles.botonCerrarTexto}>Cerrar sesión</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <ModalAyudaSoporte visible={ayudaVisible} onClose={() => setAyudaVisible(false)} />
     </KeyboardAvoidingView>
   );
 }
@@ -230,6 +241,7 @@ export default function Perfil({ navigation }) {
 const styles = StyleSheet.create({
   content: { padding: spacing.large, paddingBottom: spacing.large * 2 },
   cabecera: { alignItems: 'center', marginBottom: spacing.medium },
+  botonTuerca: { position: 'absolute', top: 0, right: 0, padding: 8, zIndex: 1 },
   avatar: {
     width: 84, height: 84, borderRadius: 42, backgroundColor: colors.primary,
     alignItems: 'center', justifyContent: 'center', marginBottom: spacing.small,
