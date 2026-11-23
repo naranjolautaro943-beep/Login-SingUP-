@@ -44,3 +44,14 @@ export const validarSoloLetras = (valor) => {
   // Permite letras (con tildes, ñ y ü) y espacios; también acepta el texto vacío
   return typeof valor === 'string' && /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]*$/.test(valor);
 };
+
+export const validarTelefono = (telefono) => {
+  if (typeof telefono !== 'string') {
+    return false;
+  }
+
+  // Se ignoran espacios, guiones y paréntesis; acepta un "+" inicial y entre 8 y 15 dígitos
+  const limpio = telefono.replace(/[\s\-()]/g, '');
+
+  return /^\+?[0-9]{8,15}$/.test(limpio);
+};

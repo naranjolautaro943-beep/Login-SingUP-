@@ -9,13 +9,14 @@ import SignUp from '../screens/SignUp';
 import Home from '../screens/Home';
 import ListadoProductos from '../screens/ListadoProductos';
 import FormularioProducto from '../screens/FormularioProducto';
-import FormularioEditarProducto from '../screens/FormularioEditarProducto';
 import ListadoCaja from '../screens/ListadoCaja';
 import FormularioMovimiento from '../screens/FormularioMovimiento';
 import ListadoCatalogo from '../screens/ListadoCatalogo';
 import FormularioCatalogo from '../screens/FormularioCatalogo';
 import ListadoActividad from '../screens/ListadoActividad';
 import FormularioActividad from '../screens/FormularioActividad';
+import Perfil from '../screens/Perfil';
+import Configuracion from '../screens/Configuracion';
 
 const Stack = createStackNavigator();
 
@@ -58,11 +59,6 @@ export default function Navigation() {
               options={{ title: 'Nuevo producto' }}
             />
             <Stack.Screen
-              name="EditarProducto"
-              component={FormularioEditarProducto}
-              options={{ title: 'Editar producto' }}
-            />
-            <Stack.Screen
               name="ListadoCaja"
               component={ListadoCaja}
               options={{ title: 'Caja' }}
@@ -97,6 +93,12 @@ export default function Navigation() {
               options={({ route }) => ({
                 title: route.params?.actividad ? 'Editar actividad' : 'Nueva actividad',
               })}
+            />
+            <Stack.Screen name="Perfil" component={Perfil} options={{ title: 'Mi perfil' }} />
+            <Stack.Screen
+              name="Configuracion"
+              component={Configuracion}
+              options={{ title: 'Configuración' }}
             />
           </>
         ) : (

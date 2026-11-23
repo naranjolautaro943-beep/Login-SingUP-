@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,6 +23,10 @@ const RUTAS = {
 
 export default function Home({ navigation }) {
   const insets = useSafeAreaInsets();
+  // Se vuelve a dibujar al recuperar el foco, para mostrar el nombre si se editó en Perfil
+  const [, actualizar] = useState(0);
+  useEffect(() => navigation.addListener('focus', () => actualizar((n) => n + 1)), [navigation]);
+
   const nombre = auth.currentUser?.displayName || 'usuario';
 
   const handleOpcion = (opcion) => {
@@ -50,9 +54,14 @@ export default function Home({ navigation }) {
         <View style={styles.brand}>
           <Image source={require('../assets/Imagen2.png')} style={styles.logo} />
         </View>
-        <TouchableOpacity onPress={() => Alert.alert('Notificaciones', 'No tenés notificaciones nuevas.')}>
-          <Ionicons name="notifications-outline" size={26} color={colors.primary} />
-        </TouchableOpacity>
+        <View style={styles.acciones}>
+          <TouchableOpacity style={styles.accionPerfil} onPress={() => navigation.navigate('Perfil')}>
+            <Ionicons name="person-circle-outline" size={30} color={colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => Alert.alert('Notificaciones', 'No tenés notificaciones nuevas.')}>
+            <Ionicons name="notifications-outline" size={26} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Text style={styles.saludo}>Hola, {nombre}</Text>
@@ -91,6 +100,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.large,
   },
   brand: { flexDirection: 'row', alignItems: 'center' },
+  acciones: { flexDirection: 'row', alignItems: 'center' },
+  accionPerfil: { marginRight: 14 },
   logo: { width: 200, height: 60, resizeMode: 'contain' },
   saludo: { fontSize: 30, color: colors.primary, marginBottom: spacing.small },
   pregunta: { fontSize: fontSizes.medium, color: colors.primary },
