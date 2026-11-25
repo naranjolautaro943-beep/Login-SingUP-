@@ -56,7 +56,9 @@ export default function Navigation() {
             <Stack.Screen
               name="FormularioProducto"
               component={FormularioProducto}
-              options={{ title: 'Nuevo producto' }}
+              options={({ route }) => ({
+                title: route.params?.producto ? 'Editar producto' : 'Nuevo producto',
+              })}
             />
             <Stack.Screen
               name="ListadoCaja"

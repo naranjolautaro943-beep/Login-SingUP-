@@ -116,7 +116,7 @@ export default function ListadoProductos({ navigation }) {
 
             <TouchableOpacity
               style={styles.boton}
-              onPress={() => navigation.navigate('EditarProducto', { id: item.id })}
+              onPress={() => navigation.navigate('FormularioProducto', { producto: item })}
             >
               <Ionicons name="create-outline" size={22} color={colors.primary} />
             </TouchableOpacity>

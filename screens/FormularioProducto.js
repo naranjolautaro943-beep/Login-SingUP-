@@ -3,16 +3,18 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, Alert,
   KeyboardAvoidingView, ScrollView, Platform,
 } from 'react-native';
-import { agregarProducto } from '../src/config/services/productosService';
+import { agregarProducto, editarProducto } from '../src/config/services/productosService';
 import { colors, fontSizes, spacing } from '../src/config/stilos/theme';
 
-export default function FormularioProducto({ navigation }) {
-  const [nombre, setNombre] = useState('');
-  const [categoria, setCategoria] = useState('');
-  const [precio, setPrecio] = useState('');
-  const [stock, setStock] = useState('');
-  const [codigoBarras, setCodigoBarras] = useState('');
-  const [proveedor, setProveedor] = useState('');
+export default function FormularioProducto({ navigation, route }) {
+  const producto = route.params?.producto;
+
+  const [nombre, setNombre] = useState(producto?.nombre ?? '');
+  const [categoria, setCategoria] = useState(producto?.categoria ?? '');
+  const [precio, setPrecio] = useState(producto?.precio != null ? String(producto.precio) : '');
+  const [stock, setStock] = useState(producto?.stock != null ? String(producto.stock) : '');
+  const [codigoBarras, setCodigoBarras] = useState(producto?.codigoBarras ?? '');
+  const [proveedor, setProveedor] = useState(producto?.proveedor ?? '');
   const [errores, setErrores] = useState({});
   const [guardando, setGuardando] = useState(false);
 
@@ -32,15 +34,20 @@ export default function FormularioProducto({ navigation }) {
     if (!validar()) return;
     setGuardando(true);
     try {
-      await agregarProducto({
+      const datos = {
         nombre: nombre.trim(),
         categoria: categoria.trim(),
         precio: Number(precio),
         stock: Number(stock),
         codigoBarras: codigoBarras.trim(),
         proveedor: proveedor.trim(),
-      });
-      Alert.alert('Listo', 'Producto guardado');
+      };
+      if (producto) {
+        await editarProducto(producto.id, datos);
+      } else {
+        await agregarProducto(datos);
+      }
+      Alert.alert('Listo', producto ? 'Producto actualizado' : 'Producto guardado');
       navigation.goBack();
     } catch (error) {
       Alert.alert('Error', 'No se pudo guardar el producto.');
@@ -80,7 +87,9 @@ export default function FormularioProducto({ navigation }) {
           onPress={handleGuardar}
           disabled={guardando}
         >
-          <Text style={styles.buttonText}>{guardando ? 'Guardando...' : 'Guardar producto'}</Text>
+          <Text style={styles.buttonText}>
+            {guardando ? 'Guardando...' : producto ? 'Guardar cambios' : 'Guardar producto'}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
