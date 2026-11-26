@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { auth } from '../src/config/firebaseConfig';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } from 'firebase/auth';
 import {
   validarObligatorio,
   validarCorreo,
@@ -197,11 +197,30 @@ export default function SignUp({ navigation }) {
 
     try {
       await updateProfile(credential.user, { displayName: `${firstName.trim()} ${lastName.trim()}` });
-      Alert.alert('Registro exitoso', 'Usuario registrado con éxito.');
     } catch (error) {
-      Alert.alert('Cuenta creada', 'La cuenta se creó, pero no se pudo guardar el nombre.');
+      console.log('No se pudo guardar el nombre:', error.code);
     }
-    // Firebase inicia la sesión y el navegador muestra Home.
+
+    // Verificación de correo obligatoria: se envía el mail y se cierra la sesión
+    try {
+      await sendEmailVerification(credential.user);
+    } catch (error) {
+      console.log('Error al enviar verificación:', error.code, error.message);
+      await signOut(auth).catch(() => {});
+      Alert.alert(
+        'Cuenta creada',
+        'La cuenta se creó, pero no se pudo enviar el correo de verificación. Intente iniciar sesión para reenviarlo.',
+        [{ text: 'Aceptar', onPress: () => navigation.navigate('Login') }]
+      );
+      return;
+    }
+
+    await signOut(auth).catch(() => {});
+    Alert.alert(
+      'Verifique su correo',
+      `Enviamos un enlace de verificación a ${email.trim()}. Debe verificar su correo antes de iniciar sesión. Revise también la carpeta de spam.`,
+      [{ text: 'Aceptar', onPress: () => navigation.navigate('Login') }]
+    );
   };
 
   return (

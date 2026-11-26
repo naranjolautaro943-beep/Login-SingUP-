@@ -25,7 +25,8 @@ export default function Navigation() {
 
   useEffect(() => {
     if (!auth) return;
-    return onAuthStateChanged(auth, setUser);
+    // Solo entra a la app quien verificó su correo electrónico.
+    return onAuthStateChanged(auth, (u) => setUser(u && u.emailVerified ? u : null));
   }, []);
 
   if (!isFirebaseConfigured) {

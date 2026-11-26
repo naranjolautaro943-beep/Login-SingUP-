@@ -14,6 +14,7 @@ import {
 } from '../src/config/utils/validations';
 import { colors, fontSizes, spacing } from '../src/config/stilos/theme';
 import ModalAyudaSoporte from '../src/config/components/ModalAyudaSoporte';
+import ModalConfirmarCerrarSesion from '../src/config/components/ModalConfirmarCerrarSesion';
 
 const CELESTE = '#2f60d0'; // Celeste Cielo (Manual de Identidad)
 
@@ -53,6 +54,8 @@ export default function Perfil({ navigation }) {
   const [guardando, setGuardando] = useState(false);
   const [aviso, setAviso] = useState('');
   const [ayudaVisible, setAyudaVisible] = useState(false);
+  const [cerrarVisible, setCerrarVisible] = useState(false);
+  const [cerrando, setCerrando] = useState(false);
 
   // LEER el teléfono guardado en Firestore
   useEffect(() => {
@@ -114,22 +117,18 @@ export default function Perfil({ navigation }) {
     }
   };
 
-  const handleCerrarSesion = () => {
-    Alert.alert('Cerrar sesión', '¿Está seguro de que desea cerrar sesión?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Cerrar sesión',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await signOut(auth);
-            // El observador de Firebase muestra Login al cerrar la sesión.
-          } catch (e) {
-            Alert.alert('Error', 'Hubo un problema al cerrar sesión.');
-          }
-        },
-      },
-    ]);
+  const handleCerrarSesion = () => setCerrarVisible(true);
+
+  const confirmarCerrarSesion = async () => {
+    setCerrando(true);
+    try {
+      await signOut(auth);
+      // El observador de Firebase muestra Login al cerrar la sesión.
+    } catch (e) {
+      setCerrando(false);
+      setCerrarVisible(false);
+      Alert.alert('Error', 'Hubo un problema al cerrar sesión.');
+    }
   };
 
   const miembroDesde = usuario?.metadata?.creationTime
@@ -234,6 +233,12 @@ export default function Perfil({ navigation }) {
       </ScrollView>
 
       <ModalAyudaSoporte visible={ayudaVisible} onClose={() => setAyudaVisible(false)} />
+      <ModalConfirmarCerrarSesion
+        visible={cerrarVisible}
+        cerrando={cerrando}
+        onConfirmar={confirmarCerrarSesion}
+        onCancelar={() => setCerrarVisible(false)}
+      />
     </KeyboardAvoidingView>
   );
 }

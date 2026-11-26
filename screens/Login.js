@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendEmailVerification, signOut } from 'firebase/auth';
 import { auth } from '../src/config/firebaseConfig';
 import { validarObligatorio, validarCorreo, validarContrasena } from '../src/config/utils/validations';
 import KeyboardForm from '../src/config/components/KeyboardWrapper';
@@ -70,8 +70,44 @@ export default function Login({ navigation }) {
     if (!validarFormulario()) return;
 
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
-      // El observador de Firebase cambia la pantalla al detectar la sesión.
+      // Evita que una sesión previa sin verificar quede colgada
+      if (auth.currentUser) await signOut(auth).catch(() => {});
+
+      const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
+      await cred.user.reload();
+
+      if (!auth.currentUser.emailVerified) {
+        const usuario = auth.currentUser;
+        Alert.alert(
+          'Correo sin verificar',
+          'Debe verificar su correo electrónico antes de iniciar sesión. Revise su bandeja de entrada (y spam).',
+          [
+            {
+              text: 'Reenviar correo',
+              onPress: async () => {
+                try {
+                  await sendEmailVerification(usuario);
+                  Alert.alert('Correo enviado', 'Le enviamos un nuevo enlace de verificación.');
+                } catch (e) {
+                  const demasiados = e.code === 'auth/too-many-requests';
+                  Alert.alert(
+                    'Error',
+                    demasiados
+                      ? 'Demasiados intentos. Espere unos minutos e intente nuevamente.'
+                      : 'No se pudo enviar el correo de verificación.'
+                  );
+                } finally {
+                  await signOut(auth).catch(() => {});
+                }
+              },
+            },
+            { text: 'Aceptar', style: 'cancel', onPress: () => signOut(auth).catch(() => {}) },
+          ],
+          { cancelable: false }
+        );
+        return;
+      }
+      // El observador de Firebase cambia la pantalla al detectar la sesión verificada.
     } catch (error) {
       console.log('Error de inicio de sesión:', error.code, error.message);
       let errorMessage = 'Hubo un problema al iniciar sesión.';
